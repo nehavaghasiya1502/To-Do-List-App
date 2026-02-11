@@ -1,34 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import "./todo.css";
 
 function Todo() {
   const [input, setInput] = useState("");
-  const [todos, setTodos] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  useEffect(() => {
-    console.log("Todos updated", todos);
-  }, [todos]);
+  const todos = useSelector((state) => state.todos);
+  const dispatch = useDispatch();
 
   const handleSubmit = () => {
     if (input.trim() === "") return;
 
     if (editId === null) {
-      setTodos([...todos, { id: Date.now(), text: input }]);
+      dispatch({ type: "ADD_TODO", payload: input });
     } else {
-      setTodos(
-        todos.map((t) =>
-          t.id === editId ? { ...t, text: input } : t
-        )
-      );
+      dispatch({
+        type: "EDIT_TODO",
+        payload: { id: editId, text: input }
+      });
       setEditId(null);
     }
-
     setInput("");
   };
 
   const handleDelete = (id) => {
-    setTodos(todos.filter((t) => t.id !== id));
+    dispatch({ type: "DELETE_TODO", payload: id });
   };
 
   const handleEdit = (id) => {
@@ -58,8 +55,12 @@ function Todo() {
           <li key={t.id}>
             <span>{t.text}</span>
             <div>
-              <button className="edit" onClick={() => handleEdit(t.id)}>Edit</button>
-              <button className="delete" onClick={() => handleDelete(t.id)}>Delete</button>
+              <button className="edit" onClick={() => handleEdit(t.id)}>
+                Edit
+              </button>
+              <button className="delete" onClick={() => handleDelete(t.id)}>
+                Delete
+              </button>
             </div>
           </li>
         ))}
